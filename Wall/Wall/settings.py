@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'daphne',
     'channels',
     'taggit',
+    'Main',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
