@@ -1,10 +1,10 @@
 from django.urls import path, include
-from views import views as chat_views
+from Main.views import chatPage as ChatpageViews
 from django.contrib.auth.views import LoginView, LogoutView
 
 
 urlpatterns = [
-    path("", chat_views.chatPage, name="chat-page"),
+    path("", ChatpageViews, name="chat-page"),
 
     # login-section
     path("auth/login/", LoginView.as_view
