@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Users,Advertisement 
+from .models import Users, Advertisement, City, Category
 from .forms import *
 from .models import Room
 @admin.register(Users)
@@ -25,10 +25,13 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ("username",)
     ordering = ("username",)
-@admin.register(Advertisement)
-class CustomAdvertisementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'owner','category' , 'city')
-    prepopulated_fields = {'slug': ('title', 'category', 'city')}
-    search_fields = ('title', 'city', 'category')
-    list_filter = ('city', 'category')
+    
+@admin.register(City)
+class CustomCityAdmin(admin.ModelAdmin):
+    search_fields = ('category_name')
+    
+@admin.register(Category)
+class CustomCategoryAdmin(admin.ModelAdmin):
+    search_fields = ('city_name',)
 
+    
