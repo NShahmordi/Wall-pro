@@ -5,7 +5,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Wall.settings')
 
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter , URLRouter
-import routing
+import Wall.routing as routing
 
 application = ProtocolTypeRouter(
     {

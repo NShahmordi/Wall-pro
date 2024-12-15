@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import Users,Advertisement 
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+from .forms import *
+from .models import Room
 @admin.register(Users)
 class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
+    add_form = SignUpForm
     form = CustomUserChangeForm
     list_display = ("username","email", "is_staff", "is_active",)
     list_filter = ("username","email", "is_staff", "is_active",)

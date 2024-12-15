@@ -1,11 +1,10 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin,User
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-from .managers import CustomUserManager
+from .managers import CustomUserManager,TokenGenerator
 # Our models
 class Users(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
@@ -17,7 +16,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=30, blank=True)
     phone_number = models.CharField(max_length=20)
-    slug = models.SlugField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True,default=username)
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
@@ -65,3 +64,23 @@ class Advertisement(models.Model):
     
     def __str__(self):
         return self.title
+
+class Room(models.Model):
+    token = models.CharField(max_length=255, unique=True)
+    users = Users()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = TokenGenerator(20)
+        return super(Room, self).save(*args, **kwargs)
+
+class Message(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    sender = models.ForeignKey(
+        Users, on_delete=models.CASCADE, related_name="sender_user"
+    )
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.sender.username

@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
-
+import random,string
 
 
 class CustomUserManager(BaseUserManager):
@@ -22,3 +22,7 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValueError(_("Superuser must have is_superuser=True."))
         return self.create_user(username, password, **extra_fields)
+
+def TokenGenerator(length):
+    random_string = "".join(random.choice(string.ascii_letters) for _ in range(length))
+    return random_string
