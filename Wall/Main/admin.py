@@ -28,10 +28,10 @@ class CustomUserAdmin(UserAdmin):
     
 @admin.register(City)
 class CustomCityAdmin(admin.ModelAdmin):
-    search_fields = ('category_name',)
+    search_fields = ('city_name',)
     
 @admin.register(Category)
 class CustomCategoryAdmin(admin.ModelAdmin):
-    search_fields = ('city_name',)
+    search_fields = ('category_name',)
 
     
