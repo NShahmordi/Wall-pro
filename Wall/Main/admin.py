@@ -33,7 +33,7 @@ class CustomAdvertisementAdmin(admin.ModelAdmin):
     list_filter = ("city", "category", "created_at")  
     search_fields = ("title", "description") 
     ordering = ("-created_at",)  
-    
+    prepopulated_fields = {'slug': ('title',)}
     
 @admin.register(City)
 class CustomCityAdmin(admin.ModelAdmin):
