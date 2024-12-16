@@ -40,6 +40,9 @@ class City(models.Model):
 class Advertisement(models.Model):
     title = models.CharField(max_length=50, null=True, blank=True)
     description = models.TextField(max_length=400, null=True, blank=True)
+    image = models.ImageField(upload_to='ads_images/',\
+        blank=True, null=True, default='default.jpg')
+    
     price = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()
