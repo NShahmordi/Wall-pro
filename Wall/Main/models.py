@@ -26,6 +26,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.username
+    
 class Category(models.Model):
     category_name = models.CharField(max_length=20, null=True, blank=True)
     def __str__(self):
@@ -42,6 +43,7 @@ class Advertisement(models.Model):
     price = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()
+    updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(max_length=200, unique=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

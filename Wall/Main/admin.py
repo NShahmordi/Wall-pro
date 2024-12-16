@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import Users, Advertisement, City, Category
 from .forms import *
 from .models import Room
+
 @admin.register(Users)
 class CustomUserAdmin(UserAdmin):
     add_form = SignUpForm
@@ -25,6 +26,14 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ("username",)
     ordering = ("username",)
+    
+@admin.register(Advertisement)
+class CustomAdvertisementAdmin(admin.ModelAdmin):
+    list_display = ("title", "price", "city", "category", "created_at", "updated_at")
+    list_filter = ("city", "category", "created_at")  
+    search_fields = ("title", "description") 
+    ordering = ("-created_at",)  
+    
     
 @admin.register(City)
 class CustomCityAdmin(admin.ModelAdmin):
