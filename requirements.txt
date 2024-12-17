@@ -167,7 +167,6 @@ poetry==1.8.3
 poetry-core==1.9.0
 poetry-plugin-export==1.8.0
 posthog==3.5.0
-prime-check-Narges @ file:///E:/barname%20sazi/prime/dist/prime_check_Narges-0.0.1.tar.gz#sha256=31d44289184d53460b42d2fd84d85d50fc4bbc741f7166b00d57ce0fb92120e8
 prometheus-client==0.17.1
 prompt-toolkit==3.0.39
 protobuf==5.27.1
