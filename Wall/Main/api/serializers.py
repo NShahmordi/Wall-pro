@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Users, Advertisement, City, Category, Message, Room 
+from ..models import Users, Advertisement, City, Category, Message, Room 
 
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
