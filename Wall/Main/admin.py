@@ -8,6 +8,7 @@ from .models import Room
 class CustomUserAdmin(UserAdmin):
     add_form = SignUpForm
     form = CustomUserChangeForm
+    prepopulated_fields = {'slug': ('id',)}
     list_display = ("username","email", "is_staff", "is_active",)
     list_filter = ("username","email", "is_staff", "is_active",)
     fieldsets = (
@@ -37,10 +38,13 @@ class CustomAdvertisementAdmin(admin.ModelAdmin):
     
 @admin.register(City)
 class CustomCityAdmin(admin.ModelAdmin):
+    list_display = ('city_name',)
     search_fields = ('city_name',)
     
 @admin.register(Category)
 class CustomCategoryAdmin(admin.ModelAdmin):
+    list_display = ('category_name',)
     search_fields = ('category_name',)
+    
 
     
