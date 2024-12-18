@@ -4,29 +4,41 @@ from .models import Users, Advertisement, City, Category
 from .forms import *
 from .models import Room
 
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import Users
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
+from .models import Users
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = Users
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = Users
 @admin.register(Users)
 class CustomUserAdmin(UserAdmin):
-    add_form = SignUpForm
-    form = CustomUserChangeForm
-    prepopulated_fields = {'slug': ('id',)}
-    list_display = ("username","email", "is_staff", "is_active",)
-    list_filter = ("username","email", "is_staff", "is_active",)
+    list_display = ('username', 'email', 'first_name', 'last_name', 'phone_number', 'is_staff') 
     fieldsets = (
-        (None, {"fields": ("username","first_name","last_name","phone_number","email", "password","slug")}),
-        ("Permissions", {"fields": ("is_staff", "is_active", "groups", "user_permissions")}),
+    (None, {'fields': ('username', 'password')}),
+    ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
+    ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+    ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-    add_fieldsets = (
+    add_fieldsets = ( # add fields to the add user page
         (None, {
-            "classes": ("wide",),
-            "fields": (
-                "username","first_name","last_name","phone_number",
-                "email", "password1" ,"password2", "is_staff",
-                "is_active", "groups", "user_permissions","slug"
-            )}
-        ),
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'first_name', 'last_name', 'phone_number', 'password', 'password2'),
+        }),
     )
-    search_fields = ("username",)
-    ordering = ("username",)
+    ordering = ('username',)
+    filter_horizontal = ()
+    list_filter = ()
+    form = CustomUserChangeForm
+    add_form = CustomUserCreationForm
     
 @admin.register(Advertisement)
 class CustomAdvertisementAdmin(admin.ModelAdmin):
