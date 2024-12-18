@@ -4,21 +4,6 @@ from .models import Users, Advertisement, City, Category
 from .forms import *
 from .models import Room
 
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import Users
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from .models import Users
-
-class CustomUserChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = Users
-
-class CustomUserCreationForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        model = Users
 @admin.register(Users)
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'phone_number', 'is_staff') 
