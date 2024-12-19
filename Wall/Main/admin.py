@@ -40,8 +40,7 @@ class CustomCityAdmin(admin.ModelAdmin):
     
 @admin.register(Category)
 class CustomCategoryAdmin(admin.ModelAdmin):
-    list_display = ('category_name',)
-    search_fields = ('category_name',)
-    
-
+    list_display = ('category_name', 'parent')
+    list_filter = ('parent',)      
+    search_fields = ('category_name',)       
     

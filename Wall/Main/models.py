@@ -29,6 +29,9 @@ class Users(AbstractBaseUser, PermissionsMixin):
     
 class Category(models.Model):
     category_name = models.CharField(max_length=20, null=True, blank=True)
+    parent = models.ForeignKey('self',
+                                on_delete=models.CASCADE, null=True, blank=True,
+                                related_name='children')
     def __str__(self):
         return self.category_name
 
