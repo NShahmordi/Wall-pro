@@ -1,11 +1,12 @@
-from django.urls import path, include
-from . import views
-
+from django.urls import path
+from .views import HomePage, product_detail, user_signup, user_login, user_logout, chatPage, create_ad
 
 urlpatterns = [
-    path('', views.HomePage,name="home"),
-    path("signup/", views.user_signup, name="signup"),
-    path("login/", views.user_login, name="login"),
-    path("logout", views.user_logout, name="logout"),
-    path('api/' , include("Main.api.urls"))
+    path('', HomePage, name='home'),
+    path('product/<slug:slug>/', product_detail, name='product_detail'),
+    path('chat/<str:username>/', chatPage, name='chat_page'),
+    path('signup/', user_signup, name='signup'),
+    path('login/', user_login, name='login'),
+    path('logout/', user_logout, name='logout'),
+    path('create-ad/', create_ad, name='create_ad'),
 ]

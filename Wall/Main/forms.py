@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm,Authentic
 from django import forms
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
-from .models import Users
+from .models import Users, Advertisement
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -67,3 +67,18 @@ class LoginForm(AuthenticationForm):
             attrs={"autocomplete": "current-password", "class": "form-control"}
         ),
     )
+
+class AdvertisementForm(forms.ModelForm):
+    class Meta:
+        model = Advertisement
+        fields = ['title', 'description', 'image', 'price', 'publication_date', 'city', 'category', 'shirt_size']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'publication_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'city': forms.Select(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'shirt_size': forms.Select(attrs={'class': 'form-control'}),
+        }
