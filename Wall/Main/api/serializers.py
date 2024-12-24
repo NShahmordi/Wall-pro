@@ -64,3 +64,21 @@ class RoomSerializers(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = ['token', 'users']
+        
+class ListOfAdvertisementSerializer(serializers.ModelSerializer):
+    short_description = serializers.SerializerMethodField()
+    class Meta:
+        model = Advertisement
+        fields = [
+            'title',
+            'short_description',
+            'image',
+            'price',
+            'created_at',
+            'city',
+            'category',
+        ]        
+    def get_short_description(self, obj):
+        if obj.description:
+            return ' '.join(obj.description.split()[:5]) + '...' if len(obj.description.split()) > 5 else obj.description
+        return None
