@@ -1,21 +1,20 @@
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
 from .forms import *
-from .models import Advertisement, Users
-from django.contrib.auth import authenticate, login, logout
+from .models import Advertisement, Users, Message, Room
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.conf import settings
+
 
 @login_required
-def chatPage(request, username):
-    target_user = get_object_or_404(Users, username=username)
-    context = {
-        'target_user': target_user
-    }
-    return render(request, "Chat/chatPage.html", context)
+def chat_history(request):
+    rooms = Room.objects.filter(user1=request.user) | Room.objects.filter(user2=request.user)
+    return render(request, 'Chat/chat_history.html', {'rooms': rooms})
 
 def HomePage(request):
     products = Advertisement.objects.all()
-    return render(request, 'Market/product_list.html', {'products': products})
+    return render(request, 'Market/product_list.html', {'Advertisments': products})
 
 def user_signup(request):
     if not request.user.is_authenticated:
@@ -55,18 +54,73 @@ def user_logout(request):
     return HttpResponseRedirect("/login/")
 
 def product_detail(request, slug):
-    product = get_object_or_404(Advertisement, slug=slug)
-    return render(request, 'Market/product_detail.html', {'product': product})
+    advertisement = get_object_or_404(Advertisement, slug=slug)
+    user1 = request.user
+    user2 = advertisement.owner
+
+    if user1.is_authenticated:
+        room, created = Room.objects.get_or_create(user1=user1, user2=user2)
+        chat_room_id = room.id
+    else:
+        chat_room_id = None
+
+    context = {
+        'advertisement': advertisement,
+        'chat_room_id': chat_room_id,
+    }
+    return render(request, 'Market/product_detail.html', context)
 
 @login_required
-def create_ad(request):
+def create_or_get_room(request, user_id):
+    user1 = request.user
+    user2 = get_object_or_404(get_user_model(), id=user_id)
+    room, created = Room.objects.get_or_create(user1=user1, user2=user2)
+    return redirect('room_detail', room_id=room.id)
+
+
+@login_required
+def edit_ad(request, slug):
+    ad = get_object_or_404(Advertisement, slug=slug)
+    if request.method == 'POST':
+        form = AdvertisementForm(request.POST, request.FILES, instance=ad)
+        if form.is_valid():
+            form.save()
+            return redirect('product_detail', slug=ad.slug)
+    else:
+        form = AdvertisementForm(instance=ad)
+    return render(request, 'Market/edit_ad.html', {'form': form, 'ad': ad})
+
+@login_required
+def create_room(request, user_id):
+    user1 = request.user
+    user2 = get_object_or_404(settings.AUTH_USER_MODEL, id=user_id)
+    room, created = Room.objects.get_or_create(user1=user1, user2=user2)
+    return redirect('room_detail', room_id=room.id)
+
+@login_required
+def room_detail(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+    messages = Message.objects.filter(room=room).order_by('timestamp')
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.room = room
+            message.sender = request.user
+            message.save()
+            return redirect('room_detail', room_id=room.id)
+    else:
+        form = MessageForm()
+    
+    return render(request, 'Chat/chatPage.html', {'room': room, 'form': form, 'messages': messages})
+
+@login_required
+def create_advertisement(request):
     if request.method == 'POST':
         form = AdvertisementForm(request.POST, request.FILES)
         if form.is_valid():
-            ad = form.save(commit=False)
-            ad.owner = request.user
-            ad.save()
-            return redirect('home')
+            form.save()
+            return redirect('advertisement_list')  # Redirect to the advertisement list or any other page
     else:
         form = AdvertisementForm()
     return render(request, 'Market/create_ad.html', {'form': form})

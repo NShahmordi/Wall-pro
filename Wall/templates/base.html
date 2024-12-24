@@ -43,7 +43,6 @@
     }
 </style>
 
-
 <!-- Navbar -->
 <nav style="background-color: #415abc;" class="navbar navbar-expand-lg navbar-dark">
     <!-- Container wrapper -->
@@ -73,7 +72,10 @@
           </li>
           {% if request.user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'create_ad' %}">Create Ad</a>
+            <a class="nav-link" href="{% url 'create_advertisement' %}">Create Ad</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'chat_history' %}">Chat History</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'logout' %}">Logout</a>
@@ -98,13 +100,11 @@
       </div>
     </div>
   </nav>
-  {% if messages %}
-  {% for message in messages %}
-  <p class="col-3 alert alert-dark mx-4 mt-3">{{message}}</p>
-  {% endfor %}
-  {% endif %}
-  {% block content %}
 
-  {% endblock content %}
+  <!-- Main content -->
+  <div class="container mt-4">
+    {% block content %}
+    {% endblock %}
+  </div>
 </body>
 </html>

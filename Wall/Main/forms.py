@@ -2,13 +2,13 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm,Authentic
 from django import forms
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
-from .models import Users, Advertisement
+from .models import Users, Advertisement, Message
 
 class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = Users
-        fields = ("username","first_name","last_name","email","phone_number",)
+        fields = ("username","first_name","last_name","email","phone_number")
         labels = {
             "first_name": "First Name",
             "last_name": "Last Name",
@@ -29,7 +29,7 @@ class CustomUserChangeForm(UserChangeForm):
 
     class Meta:
         model = Users
-        fields = ("username",)
+        fields = ("username", "first_name", "last_name", "email", "phone_number")
 
 class SignUpForm(CustomUserCreationForm):
     password1 = forms.CharField(
@@ -82,3 +82,8 @@ class AdvertisementForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-control'}),
             'shirt_size': forms.Select(attrs={'class': 'form-control'}),
         }
+
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['content']

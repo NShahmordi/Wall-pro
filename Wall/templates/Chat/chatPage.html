@@ -1,48 +1,57 @@
-<html>
-  <body>
-    <center><h1>Hello , Welcome to Divar Chatinng system ! {{request.user}}</h1></center>
-    <br>
-    {% if request.user.is_authenticated  %}
-    <center> Logout the chat Page <a href = "{% url 'logout-user' %}">Logout</a></center>
-    {% endif %}
-    <div
-      class="chat__item__container"
-      id="id_chat_item_container"
-      style="font-size: 20px"
-    >
-      <br />
-      <input type="text" id="id_message_send_input" />
-      <button type="submit" id="id_message_send_button">Send Message</button>
-      <br />
-      <br />
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <div class="chat-container">
+        <div class="chat-header text-center mb-4">
+            <h2>Chat with 
+                {% if request.user == room.user1 %}
+                    {{ room.user2.username }}
+                {% else %}
+                    {{ room.user1.username }}
+                {% endif %}
+            </h2>
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+            {% endif %}
+        </div>
+        <div class="chat-messages p-3 mb-4" id="id_chat_item_container" style="height: 400px; overflow-y: scroll; border: 1px solid #ccc; border-radius: 10px; background-color: #fff;">
+            <!-- Display chat history -->
+            {% for message in messages %}
+            <div class="mb-2">
+                <strong>{{ message.sender.username }}:</strong> {{ message.content }} <br>
+                <small class="text-muted">{{ message.timestamp }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="chat-input d-flex">
+            <input type="text" id="id_message_send_input" class="form-control me-2" placeholder="Type your message...">
+            <button type="submit" id="id_message_send_button" class="btn btn-primary">Send</button>
+        </div>
     </div>
-    <script>
-      const chatSocket = new WebSocket("ws://" + window.location.host + "/");
-      chatSocket.onopen = function (e) {
-        console.log("The connection was setup successfully !");
-      };
-      chatSocket.onclose = function (e) {
-        console.log("Something unexpected happened !");
-      };
-      document.querySelector("#id_message_send_input").focus();
-      document.querySelector("#id_message_send_input").onkeyup = function (e) {
-        if (e.keyCode == 13) {
-          document.querySelector("#id_message_send_button").click();
-        }
-      };
-      document.querySelector("#id_message_send_button").onclick = function (e) {
-        var messageInput = document.querySelector(
-          "#id_message_send_input"
-        ).value;
-        chatSocket.send(JSON.stringify({ message: messageInput, username : "{{request.user.username}}"}));
-      };
-      chatSocket.onmessage = function (e) {
+</div>
+<script>
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/' + '{{ room.id }}/'
+    );
+
+    chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        var div = document.createElement("div");
-        div.innerHTML = data.username + " : " + data.message;
-        document.querySelector("#id_message_send_input").value = "";
+        const div = document.createElement('div');
+        div.classList.add('mb-2');
+        div.innerHTML = `<strong>${data.username}:</strong> ${data.message} <br><small class="text-muted">${data.timestamp}</small>`;
         document.querySelector("#id_chat_item_container").appendChild(div);
-      };
-    </script>
-  </body>
-</html>
+        document.querySelector("#id_chat_item_container").scrollTop = document.querySelector("#id_chat_item_container").scrollHeight;
+    };
+
+    document.querySelector('#id_message_send_button').onclick = function(e) {
+        const messageInputDom = document.querySelector('#id_message_send_input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'username': '{{ request.user.username }}'
+        }));
+        messageInputDom.value = '';
+    };
+</script>
+{% endblock %}

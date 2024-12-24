@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row">
-        {% for product in products %}
+        {% for product in Advertisments %}
         <div class="col-md-4">
             <div class="card mb-4">
                 <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
@@ -11,6 +11,9 @@
                     <p class="card-text">{{ product.description }}</p>
                     <p class="card-text"><strong>${{ product.price }}</strong></p>
                     <a href="{% url 'product_detail' product.slug %}" class="btn btn-primary">View Details</a>
+                    {% if request.user == product.owner %}
+                    <a href="{% url 'edit_ad' product.slug %}" class="btn btn-warning">Edit</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
