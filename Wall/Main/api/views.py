@@ -20,26 +20,26 @@ class CitySerializersViewSet(viewsets.ModelViewSet):
     #Define QuerySets
     queryset = City.objects.all()
     #Specify Serializer
-    serializer_class = CitySerilizers
+    serializer_class = CitySerializers
 
 
 class CategorySerializersViewSet(viewsets.ModelViewSet):
     #Define QuerySets
     queryset = Category.objects.all()
     #Specify Serializer
-    serializer_class = CategorySerilizers
+    serializer_class = CategorySerializers
 
 
 class RoomSerializersViewSet(viewsets.ModelViewSet):
     #Define QuerySets
     queryset = Room.objects.all()
     #Specify Serializer
-    serializer_class = RoomSerilizers
+    serializer_class = RoomSerializers
 
 
 class MessageSerializersViewSet(viewsets.ModelViewSet):
     #Define QuerySets
     queryset = Message.objects.all()
     #Specify Serializer
-    serializer_class = MessageSerilizers
+    serializer_class = MessageSerializers
 

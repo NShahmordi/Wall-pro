@@ -1,6 +1,5 @@
-from django.urls import path
-from .views import HomePage, product_detail, user_signup, user_login, user_logout, create_advertisement, edit_ad, chat_history, create_or_get_room, room_detail
-
+from .views import *
+from django.urls import path, include
 urlpatterns = [
     path('', HomePage, name='home'),
     path('product/<slug:slug>/', product_detail, name='product_detail'),
@@ -12,4 +11,5 @@ urlpatterns = [
     path('chat-history/', chat_history, name='chat_history'),
     path('room/create/<int:user_id>/', create_or_get_room, name='create_room'),
     path('room/<int:room_id>/', room_detail, name='room_detail'),
+    path('api/', include('Main.api.urls')),
 ]
