@@ -73,6 +73,15 @@ class Advertisement(models.Model):
     
     def __str__(self):
         return self.title
+    
+class AdvertisementImage(models.Model):
+    advertisement = models.ForeignKey(
+        Advertisement, 
+        on_delete=models.CASCADE, 
+        related_name='images'
+    )
+    image = models.ImageField(upload_to='ads_images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)    
 
 class Room(models.Model):
     token = models.CharField(max_length=255, unique=True)

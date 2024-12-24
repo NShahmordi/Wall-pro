@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Users, Advertisement, City, Category
+from .models import Users, Advertisement,AdvertisementImage, City, Category
 from .forms import *
 from .models import Room
 
@@ -24,7 +24,10 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ()
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
-    
+ 
+class AdvertisementImageInline(admin.TabularInline):
+    model = AdvertisementImage
+    extra = 1     
 @admin.register(Advertisement)
 class CustomAdvertisementAdmin(admin.ModelAdmin):
     list_display = ("title", "price", "city", "category", "created_at", "updated_at")
@@ -32,7 +35,10 @@ class CustomAdvertisementAdmin(admin.ModelAdmin):
     search_fields = ("title", "description") 
     ordering = ("-created_at",)  
     prepopulated_fields = {'slug': ('title',)}
-    
+    inlines = [AdvertisementImageInline]
+
+
+
 @admin.register(City)
 class CustomCityAdmin(admin.ModelAdmin):
     list_display = ('city_name',)
