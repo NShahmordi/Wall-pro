@@ -7,6 +7,11 @@
         <p>{{ advertisement.description }}</p>
         <p>Price: {{ advertisement.price }}</p>
         <p>Owner: {{ advertisement.owner.username }}</p>
+        <div class="product-images">
+            {% for image in advertisement.get_images %}
+                <img src="{{ image.url }}" alt="{{ advertisement.title }}">
+            {% endfor %}
+        </div>
         {% if chat_room_id %}
         <a href="{% url 'room_detail' room_id=chat_room_id %}" class="btn btn-primary">Chat with Owner</a>
         {% else %}

@@ -52,7 +52,6 @@ class City(models.Model):
 class Advertisement(models.Model):
     title = models.CharField(max_length=50, null=True, blank=True)
     description = models.TextField(max_length=400, null=True, blank=True)
-    image = models.ImageField(upload_to='ads_images/', blank=True, null=True, default='default.jpg')
     price = models.IntegerField()
     room = models.OneToOneField('Room', on_delete=models.CASCADE, related_name='advertisement', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -67,26 +66,15 @@ class Advertisement(models.Model):
         ('as_new', 'as new'),
         ('U', 'Used'),
     )
-    shirt_size = models.CharField(max_length=6, choices=SHIRT_SIZES)
-
-    class Meta:
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['-title'])
-        ]
-
     def __str__(self):
         return self.title
-    
-class AdvertisementImage(models.Model):
-    advertisement = models.ForeignKey(
-        Advertisement, 
-        on_delete=models.CASCADE, 
-        related_name='images'
-    )
-    image = models.ImageField(upload_to='ads_images/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)    
 
+    def get_images(self):
+        return self.images.all() if self.images.exists() else []
+
+class AdvertisementImage(models.Model):
+    advertisement = models.ForeignKey(Advertisement, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='ads_images/')
 
 class Room(models.Model):
     user1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user1_rooms', on_delete=models.CASCADE)

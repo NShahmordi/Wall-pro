@@ -2,7 +2,8 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm,Authentic
 from django import forms
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
-from .models import Users, Advertisement, Message
+from .models import Users, Advertisement, Message, AdvertisementImage
+from .widgets import MultipleFileInput
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -69,18 +70,17 @@ class LoginForm(AuthenticationForm):
     )
 
 class AdvertisementForm(forms.ModelForm):
+    images = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
     class Meta:
         model = Advertisement
-        fields = ['title', 'description', 'image', 'price', 'publication_date', 'city', 'category', 'shirt_size']
+        fields = ['title', 'description', 'price', 'publication_date', 'category', 'city', 'images']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'publication_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'city': forms.Select(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
-            'shirt_size': forms.Select(attrs={'class': 'form-control'}),
         }
 
 class MessageForm(forms.ModelForm):

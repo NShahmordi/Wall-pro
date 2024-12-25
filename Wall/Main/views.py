@@ -1,11 +1,10 @@
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
 from .forms import *
-from .models import Advertisement, Users, Message, Room
+from .models import Advertisement, Users, Message, Room, AdvertisementImage
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-
 
 @login_required
 def chat_history(request):
@@ -84,7 +83,12 @@ def edit_ad(request, slug):
     if request.method == 'POST':
         form = AdvertisementForm(request.POST, request.FILES, instance=ad)
         if form.is_valid():
-            form.save()
+            advertisement = form.save()
+            images = request.FILES.getlist('images')
+            if images:
+                AdvertisementImage.objects.filter(advertisement=advertisement).delete()
+                for image in images:
+                    AdvertisementImage.objects.create(advertisement=advertisement, image=image)
             return redirect('product_detail', slug=ad.slug)
     else:
         form = AdvertisementForm(instance=ad)
@@ -119,8 +123,10 @@ def create_advertisement(request):
     if request.method == 'POST':
         form = AdvertisementForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('advertisement_list')  # Redirect to the advertisement list or any other page
+            advertisement = form.save()
+            for file in request.FILES.getlist('images'):
+                AdvertisementImage.objects.create(advertisement=advertisement, image=file)
+            return redirect('home')  # Replace with your success URL
     else:
         form = AdvertisementForm()
     return render(request, 'Market/create_ad.html', {'form': form})
