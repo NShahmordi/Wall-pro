@@ -53,12 +53,21 @@ class Advertisement(models.Model):
     title = models.CharField(max_length=50, null=True, blank=True)
     description = models.TextField(max_length=400, null=True, blank=True)
     price = models.IntegerField()
-    room = models.OneToOneField('Room', on_delete=models.CASCADE, related_name='advertisement', null=True, blank=True)
+    room = models.OneToOneField( 
+                                'Room',
+                                on_delete=models.CASCADE,
+                                related_name='advertisement',
+                                null=True, blank=True
+                                )
     created_at = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(max_length=200, unique=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='advertisement', on_delete=models.CASCADE)
+    owner = models.ForeignKey( 
+                              settings.AUTH_USER_MODEL,
+                              related_name='advertisement',
+                              on_delete=models.CASCADE
+                              )
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     SHIRT_SIZES = (
@@ -66,6 +75,7 @@ class Advertisement(models.Model):
         ('as_new', 'as new'),
         ('U', 'Used'),
     )
+    shirt_size = models.CharField(max_length=6, choices=SHIRT_SIZES,default='N')
     def __str__(self):
         return self.title
 
@@ -73,12 +83,23 @@ class Advertisement(models.Model):
         return self.images.all() if self.images.exists() else []
 
 class AdvertisementImage(models.Model):
-    advertisement = models.ForeignKey(Advertisement, related_name='images', on_delete=models.CASCADE)
+    advertisement = models.ForeignKey( Advertisement,
+                                      related_name='images',
+                                      on_delete=models.CASCADE
+                                      )
     image = models.ImageField(upload_to='ads_images/')
 
 class Room(models.Model):
-    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user1_rooms', on_delete=models.CASCADE)
-    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user2_rooms', on_delete=models.CASCADE)
+    user1 = models.ForeignKey( 
+                              settings.AUTH_USER_MODEL,
+                              related_name='user1_rooms',
+                              on_delete=models.CASCADE
+                              )
+    user2 = models.ForeignKey( 
+                              settings.AUTH_USER_MODEL,
+                              related_name='user2_rooms',
+                              on_delete=models.CASCADE
+                              )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -89,7 +110,10 @@ class Room(models.Model):
 
 class Message(models.Model):
     room = models.ForeignKey(Room, related_name='messages', on_delete=models.CASCADE)
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey( settings.AUTH_USER_MODEL,
+                               related_name='messages',
+                               on_delete=models.CASCADE
+                               )
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
