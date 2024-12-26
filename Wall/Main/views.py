@@ -76,7 +76,6 @@ def create_or_get_room(request, user_id):
     room, created = Room.objects.get_or_create(user1=user1, user2=user2)
     return redirect('room_detail', room_id=room.id)
 
-
 @login_required
 def edit_ad(request, slug):
     ad = get_object_or_404(Advertisement, slug=slug)
@@ -123,7 +122,9 @@ def create_advertisement(request):
     if request.method == 'POST':
         form = AdvertisementForm(request.POST, request.FILES)
         if form.is_valid():
-            advertisement = form.save()
+            advertisement = form.save(commit=False)
+            advertisement.owner = request.user  # Set the owner to the current logged-in user
+            advertisement.save()
             for file in request.FILES.getlist('images'):
                 AdvertisementImage.objects.create(advertisement=advertisement, image=file)
             return redirect('home')  # Replace with your success URL

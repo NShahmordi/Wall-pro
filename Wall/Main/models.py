@@ -9,6 +9,14 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager,TokenGenerator
+import random
+import string
+
+def generate_unique_token():
+    while True:
+        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        if not Room.objects.filter(token=token).exists():
+            return token
 
 # Our models
 class Users(AbstractBaseUser, PermissionsMixin):
@@ -50,19 +58,13 @@ class City(models.Model):
         return self.city_name
 
 class Advertisement(models.Model):
-    title = models.CharField(max_length=50, null=True, blank=True)
-    description = models.TextField(max_length=400, null=True, blank=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
     price = models.IntegerField()
-    room = models.OneToOneField( 
-                                'Room',
-                                on_delete=models.CASCADE,
-                                related_name='advertisement',
-                                null=True, blank=True
-                                )
     created_at = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(max_length=200, unique=True)
+    slug = models.SlugField(unique=True, blank=True, null=True)
     owner = models.ForeignKey( 
                               settings.AUTH_USER_MODEL,
                               related_name='advertisement',
@@ -82,6 +84,11 @@ class Advertisement(models.Model):
     def get_images(self):
         return self.images.all() if self.images.exists() else []
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Advertisement, self).save(*args, **kwargs)
+
 class AdvertisementImage(models.Model):
     advertisement = models.ForeignKey( Advertisement,
                                       related_name='images',
@@ -90,23 +97,29 @@ class AdvertisementImage(models.Model):
     image = models.ImageField(upload_to='ads_images/')
 
 class Room(models.Model):
-    user1 = models.ForeignKey( 
-                              settings.AUTH_USER_MODEL,
-                              related_name='user1_rooms',
-                              on_delete=models.CASCADE
-                              )
-    user2 = models.ForeignKey( 
-                              settings.AUTH_USER_MODEL,
-                              related_name='user2_rooms',
-                              on_delete=models.CASCADE
-                              )
+    user1 = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='user1_rooms',
+        on_delete=models.CASCADE
+    )
+    user2 = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='user2_rooms',
+        on_delete=models.CASCADE
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    token = models.CharField(max_length=10, unique=True, blank=True, null=True)
 
     class Meta:
         unique_together = ('user1', 'user2')
 
     def __str__(self):
         return f"Room between {self.user1} and {self.user2}"
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = generate_unique_token()
+        super(Room, self).save(*args, **kwargs)
 
 class Message(models.Model):
     room = models.ForeignKey(Room, related_name='messages', on_delete=models.CASCADE)
@@ -120,10 +133,3 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender} in {self.room}"
-    
-@receiver(post_save, sender=Advertisement)
-def create_room_for_advertisement(sender, instance, created, **kwargs):
-    if created and not instance.room:
-        room = Room.objects.create(token=uuid.uuid4())  # Generate a UUID for the token
-        instance.room = room
-        instance.save()
