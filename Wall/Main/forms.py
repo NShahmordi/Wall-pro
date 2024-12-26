@@ -70,7 +70,7 @@ class LoginForm(AuthenticationForm):
     )
 
 class AdvertisementForm(forms.ModelForm):
-    images = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
+    images = forms.FileField(widget=MultipleFileInput(attrs={'multiple': True}), required=False)
     class Meta:
         model = Advertisement
         fields = ['title', 'description', 'price', 'publication_date', 'category', 'city', 'images']

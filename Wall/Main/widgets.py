@@ -9,3 +9,8 @@ class MultipleFileInput(ClearableFileInput):
             attrs = {}
         attrs.update({'multiple': True})
         self.attrs = attrs
+
+    def value_from_datadict(self, data, files, name):
+        if hasattr(files, 'getlist'):
+            return files.getlist(name)
+        return files.get(name)
