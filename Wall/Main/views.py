@@ -120,14 +120,37 @@ def room_detail(request, room_id):
 @login_required
 def create_advertisement(request):
     if request.method == 'POST':
-        form = AdvertisementForm(request.POST, request.FILES)
-        if form.is_valid():
-            advertisement = form.save(commit=False)
-            advertisement.owner = request.user  # Set the owner to the current logged-in user
+        advertisement_form = AdvertisementForm(request.POST)
+        image_form = AdvertismentImageForm(request.POST, request.FILES)
+
+        print(request.FILES)  # Debugging file uploads
+        print(request.POST)   # Debugging form data
+
+        if advertisement_form.is_valid():
+            advertisement = advertisement_form.save(commit=False)
+            advertisement.owner = request.user  # Assign the logged-in user as the owner
             advertisement.save()
-            for file in request.FILES.getlist('images'):
-                AdvertisementImage.objects.create(advertisement=advertisement, image=file)
-            return redirect('home')  # Replace with your success URL
+
+            # Process and save each uploaded image
+            images = request.FILES.getlist('image')
+            for image in images:
+                AdvertisementImage.objects.create(advertisement=advertisement, image=image)
+
+            return redirect('home')
+
     else:
-        form = AdvertisementForm()
-    return render(request, 'Market/create_ad.html', {'form': form})
+        advertisement_form = AdvertisementForm()
+        image_form = AdvertismentImageForm()
+
+    return render(request, 'Market/create_ad.html', {
+        'advertisement_form': advertisement_form,
+        'image_form': image_form
+    })
+
+@login_required
+def delete_advertisement(request, slug):
+    ad = get_object_or_404(Advertisement, slug=slug)
+    if request.method == 'POST':
+        ad.delete()
+        return redirect('home')  # Redirect to the home page or any other page
+    return render(request, 'Market/edit_ad.html', {'ad': ad})

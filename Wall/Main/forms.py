@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
 from .models import Users, Advertisement, Message, AdvertisementImage
-from .widgets import MultipleFileInput
+from .widgets import *
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -70,10 +70,10 @@ class LoginForm(AuthenticationForm):
     )
 
 class AdvertisementForm(forms.ModelForm):
-    images = forms.FileField(widget=MultipleFileInput(attrs={'multiple': True}), required=False)
+    # image = forms.MultipleChoiceField(widget=forms.widgets.ClearableFileInput(attrs={'multiple': True, 'accept': 'image/*'}),required=False)
     class Meta:
         model = Advertisement
-        fields = ['title', 'description', 'price', 'publication_date', 'category', 'city', 'images']
+        fields = ['title', 'description', 'price', 'publication_date', 'category', 'city']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
@@ -82,7 +82,18 @@ class AdvertisementForm(forms.ModelForm):
             'city': forms.Select(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
         }
+class AdvertismentImageForm(forms.ModelForm):
+    class Meta:
+        model = AdvertisementImage
+        fields = ('image',)
+        widgets = {
+            'image': MultipleFileInput(attrs={'multiple': True, 'accept': 'image/*'}),
+        }
 
+    def save(self, advertisement, *args, **kwargs):
+        images = self.files.getlist('image')
+        for image in images:
+            AdvertisementImage.objects.create(advertisement=advertisement, image=image)
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message

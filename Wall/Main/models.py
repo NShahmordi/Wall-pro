@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -8,15 +7,14 @@ from django.utils.text import slugify
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from .managers import CustomUserManager,TokenGenerator
+from .managers import CustomUserManager
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 import random
 import string
+import os
 
-def generate_unique_token():
-    while True:
-        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-        if not Room.objects.filter(token=token).exists():
-            return token
+
 
 # Our models
 class Users(AbstractBaseUser, PermissionsMixin):
@@ -58,18 +56,14 @@ class City(models.Model):
         return self.city_name
 
 class Advertisement(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField()
+    title = models.CharField(max_length=40, null=True)
+    description = models.TextField(default='No description provided')
     price = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
-    owner = models.ForeignKey( 
-                              settings.AUTH_USER_MODEL,
-                              related_name='advertisement',
-                              on_delete=models.CASCADE
-                              )
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     SHIRT_SIZES = (
@@ -95,7 +89,19 @@ class AdvertisementImage(models.Model):
                                       on_delete=models.CASCADE
                                       )
     image = models.ImageField(upload_to='ads_images/')
+    def delete(self, *args, **kwargs):
+        # Remove the file from the filesystem
+        if self.image:
+            if os.path.isfile(self.image.path):
+                os.remove(self.image.path)
+        super().delete(*args, **kwargs)
 
+def generate_unique_token():
+    while True:
+        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        if not Room.objects.filter(token=token).exists():
+            return token
+        
 class Room(models.Model):
     user1 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -133,3 +139,8 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender} in {self.room}"
+
+@receiver(post_delete, sender=Advertisement)
+def delete_advertisement_images(sender, instance, **kwargs):
+    for image in instance.images.all():
+        image.delete()  # This calls the custom delete method of AdvertisementImage

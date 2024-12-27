@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout/', user_logout, name='logout'),
     path('create-ad/', create_advertisement, name='create_advertisement'),
     path('edit-ad/<slug:slug>/', edit_ad, name='edit_ad'),
+    path('edit-ad/<slug:slug>/delete/', delete_advertisement, name='delete_advertisement'),
     path('chat-history/', chat_history, name='chat_history'),
     path('room/create/<int:user_id>/', create_or_get_room, name='create_room'),
     path('room/<int:room_id>/', room_detail, name='room_detail'),
