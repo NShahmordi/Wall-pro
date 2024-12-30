@@ -2,20 +2,68 @@
 {% load static %}
 {% block content %}
 <div class="container mt-5">
-    <div class="product-detail">
-        <h2>{{ advertisement.title }}</h2>
-        <p>{{ advertisement.description }}</p>
-        <p>Price: {{ advertisement.price }}</p>
-        <p>Owner: {{ advertisement.owner.username }}</p>
-        <div class="product-images">
-            {% for image in advertisement.get_images %}
-                <img src="{{ image.url }}" alt="{{ advertisement.title }}">
-            {% endfor %}
+    <div class="row">
+        <!-- Product Image Carousel -->
+        <div class="col-md-6">
+            <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for img in image %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ img.image.url }}" class="d-block w-100" alt="{{ advertisement.title }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
         </div>
-        {% if chat_room_id %}
-        <a href="{% url 'room_detail' room_id=chat_room_id %}" class="btn btn-primary">Chat with Owner</a>
+
+        <!-- Product Details -->
+        <div class="col-md-6">
+            <h2 class="mt-4">{{ advertisement.title }}</h2>
+            <p><strong>Price:</strong> ${{ advertisement.price }}</p>
+            <p>{{ advertisement.description }}</p>
+
+            {% if user.is_authenticated %}
+                {% if user.username != advertisement.owner.username %}
+                    <a href="{% url 'create_room' ad_slug=slug  %}" class="btn btn-dark">Chat with Owner</a>
+                {% else %}
+                    <p>You Cannot Chat on Your Own Advertisement</p>
+                {% endif %}
+            {% else %}
+                <p>Please <a href="{% url 'login' %}">login</a> to chat with the owner.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Suggested Advertisements Section -->
+    <div class="suggested-ads mt-5 pt-5 border-top">
+        <h3 class="mb-4">Suggested Advertisements</h3>
+        {% if product_recommendations %}
+            <div class="row">
+                {% for ad in product_recommendations %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ ad.title }}</h5>
+                            <p class="card-text">{{ ad.description|truncatewords:20 }}</p>
+                            <p class="card-text"><strong>Price:</strong> {{ ad.price }}</p>
+                            <p class="card-text"><strong>City:</strong> {{ ad.city }}</p>
+                            <p class="card-text"><strong>Category:</strong> {{ ad.category }}</p>
+                            <a href="{% url 'product_detail' slug=ad.id %}" class="btn btn-dark">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         {% else %}
-        <p>Please <a href="{% url 'login' %}">login</a> to chat with the owner.</p>
+            <p>No recommendations available.</p>
         {% endif %}
     </div>
 </div>

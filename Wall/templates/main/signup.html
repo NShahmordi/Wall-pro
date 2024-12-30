@@ -2,31 +2,63 @@
 {% load static %}
 
 {% block content %}
-
-<div class="row">
-    <div class="col-4"></div>
-    <div class="col-4 mt-4 card">
-        <h3 style="font-family: Georgia, serif; font-size: 40px;" class="text-center my-5">Signup Page</h3> 
-        <form action="" method="post" novalidate>
-          {% csrf_token %}
-          {% for fm in form %}
-           <div class="form-group mb-2">
-           {{fm.label_tag}} {{fm}} <small class="text-warning">{{fm.errors|striptags}}</small>
-           </div>
-          {% endfor %}
-          {% if form.non_field_errors %}
-          {% for error in form.non_field_errors %}
-          <p class="alert alert-danger my-3">{{error}}</p>
-          {% endfor %}
-          {% endif %}
-          <button type="submit" class="btn btn-primary btn-block mt-4">Signup</button>
-         </form>
-         <!-- Register buttons -->
-        <div class="text-center mt-4 mb-4">
-            <p>Already registered? <a class="text-primary" href="{% url 'login' %}"><b>Login</b></a></p>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-center mb-4" style="font-family: Georgia, serif; font-size: 40px;">Signup Page</h3>
+                    <form action="" method="post" novalidate>
+                        {% csrf_token %}
+                        <!-- Username Field at the Top -->
+                        <div class="form-group mb-3">
+                            {{ form.username.label_tag }} {{ form.username }}
+                            {% if form.username.errors %}
+                            <small class="text-danger">{{ form.username.errors|striptags }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                {% for field in form %}
+                                    {% if field.name != 'username' and forloop.counter0|divisibleby:2 %}
+                                    <div class="form-group mb-3">
+                                        {{ field.label_tag }} {{ field }}
+                                        {% if field.errors %}
+                                        <small class="text-danger">{{ field.errors|striptags }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                {% for field in form %}
+                                    {% if field.name != 'username' and not forloop.counter0|divisibleby:2 %}
+                                    <div class="form-group mb-3">
+                                        {{ field.label_tag }} {{ field }}
+                                        {% if field.errors %}
+                                        <small class="text-danger">{{ field.errors|striptags }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                        <p class="alert alert-danger">{{ error }}</p>
+                        {% endfor %}
+                        {% endif %}
+                        <button type="submit" class="btn btn-dark btn-block mt-4">Signup</button>
+                    </form>
+                    <!-- Register buttons -->
+                    <div class="text-center mt-4">
+                        <p>Already registered? <a class="text-dark" href="{% url 'login' %}"><b>Login</b></a></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-4"></div>
 </div>
-  
-{% endblock content %}
+{% endblock %}

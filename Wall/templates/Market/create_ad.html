@@ -1,34 +1,54 @@
 {% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
 {% block content %}
 <div class="container mt-5">
-    <h2>Create Advertisement</h2>
+    <h2 class="text-center mb-4">Create Advertisement</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        <div class="row g-3">
+            <!-- Advertisement Form Fields -->
+            <div class="col-md-6">
+                {{ advertisement_form.non_field_errors }}
+                {% for field in advertisement_form %}
+                    {% if field.name != 'category' %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field|add_class:"form-control" }}
+                            {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
 
-        <!-- Advertisement Form Fields -->
-        <div class="mb-3">
-            {{ advertisement_form.non_field_errors }}
-            {% for field in advertisement_form %}
+            <!-- Category and Image Upload Form Fields -->
+            <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger">{{ field.errors }}</div>
+                    <label for="id_category" class="form-label">Category</label>
+                    <select name="category" id="id_category" class="form-control">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if advertisement_form.category.errors %}
+                        <div class="text-danger">{{ advertisement_form.category.errors }}</div>
                     {% endif %}
                 </div>
-            {% endfor %}
+                <div class="mb-3">
+                    <label for="id_image" class="form-label">Upload Images</label>
+                    {{ image_form.image|add_class:"form-control" }}
+                    {% if image_form.errors %}
+                        <div class="text-danger">{{ image_form.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-
-        <!-- Image Upload Form Fields -->
-        <div class="mb-3">
-            <label for="id_image" class="form-label">Upload Images</label>
-            {{ image_form.image }}
-            {% if image_form.errors %}
-                <div class="text-danger">{{ image_form.errors }}</div>
-            {% endif %}
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-dark">Submit</button>
         </div>
-
-        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
 {% endblock %}

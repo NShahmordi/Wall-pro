@@ -57,7 +57,7 @@ class City(models.Model):
 
 class Advertisement(models.Model):
     title = models.CharField(max_length=40, null=True)
-    description = models.TextField(default='No description provided')
+    description = models.TextField()
     price = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()

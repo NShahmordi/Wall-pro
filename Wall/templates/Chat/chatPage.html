@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-5">
     <div class="chat-container">
-        <div class="chat-header text-center mb-4">
+        <div class="chat-header d-flex justify-content-between align-items-center">
             <h2>Chat with 
                 {% if request.user == room.user1 %}
                     {{ room.user2.username }}
@@ -20,7 +20,7 @@
             {% for message in messages %}
             <div class="mb-2">
                 <strong>{{ message.sender.username }}:</strong> {{ message.content }} <br>
-                <small class="text-muted">{{ message.timestamp }}</small>
+                <small class="text-muted">{{ message.timestamp|date:"M. d, Y, g:i a"}}</small>
             </div>
             {% endfor %}
         </div>
@@ -44,7 +44,7 @@
         document.querySelector("#id_chat_item_container").scrollTop = document.querySelector("#id_chat_item_container").scrollHeight;
     };
 
-    document.querySelector('#id_message_send_button').onclick = function(e) {
+    function sendMessage() {
         const messageInputDom = document.querySelector('#id_message_send_input');
         const message = messageInputDom.value;
         chatSocket.send(JSON.stringify({
@@ -52,6 +52,16 @@
             'username': '{{ request.user.username }}'
         }));
         messageInputDom.value = '';
+    }
+
+    document.querySelector('#id_message_send_button').onclick = function(e) {
+        sendMessage();
     };
+
+    document.querySelector('#id_message_send_input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
 </script>
 {% endblock %}

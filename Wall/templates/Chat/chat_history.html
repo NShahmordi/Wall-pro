@@ -20,7 +20,7 @@
                         {% endwith %}
                     </p>
                 </div>
-                <a href="{% url 'room_detail' room.id %}" class="btn btn-primary">Go to Chat</a>
+                <a href="{% url 'room_detail' token=room.token %}" class="btn btn-primary">Go to Chat</a>
             </div>
             {% endfor %}
         {% else %}

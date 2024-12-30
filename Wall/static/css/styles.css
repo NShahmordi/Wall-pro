@@ -1,0 +1,56 @@
+body {
+    filter: grayscale(100%);
+}
+
+.container {
+    margin-top: 50px;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.alert {
+    margin-bottom: 20px;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+
+.image-container img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.delete-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+.text-danger {
+    color: red;
+}
+
+.btn-primary {
+    margin-top: 20px;
+}
+
+.btn-danger {
+    margin-top: 10px;
+}

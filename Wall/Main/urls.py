@@ -10,7 +10,8 @@ urlpatterns = [
     path('edit-ad/<slug:slug>/', edit_ad, name='edit_ad'),
     path('edit-ad/<slug:slug>/delete/', delete_advertisement, name='delete_advertisement'),
     path('chat-history/', chat_history, name='chat_history'),
-    path('room/create/<int:user_id>/', create_or_get_room, name='create_room'),
-    path('room/<int:room_id>/', room_detail, name='room_detail'),
+    path('room/create/<str:ad_slug>/', create_or_get_room, name='create_room'),
+    path('room/<str:token>/', room_detail, name='room_detail'),
+    path('delete_image/<int:image_id>/', delete_image, name='delete_image'),
     path('api/', include('Main.api.urls')),
 ]

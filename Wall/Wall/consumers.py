@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from Main.models import Message, Room, Users
@@ -26,44 +27,45 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['message']
+        message_content = data['message']
         username = data['username']
 
-        # Save message to database
-        await self.save_message(username, message)
-        chat_history = await self.get_chat_history()
+        # Save message to the database and get its ID
+        message_id = await self.save_message(username, message_content)
 
-        # Send message to room group
+        # Send the new message to the room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message,
-                'username': username,
-                'chat_history': chat_history
+                'message_id': message_id
             }
         )
 
     async def chat_message(self, event):
-        message = event['message']
-        username = event['username']
-        chat_history = event['chat_history']
-
-        # Send message to WebSocket
+        message_id = event.get('message_id')
+        message = await self.get_message_by_id(message_id)
+        timestamp = message['timestamp']
+        # Send formatted message to WebSocket
         await self.send(text_data=json.dumps({
-            'message': message,
-            'username': username,
-            'chat_history': chat_history
+            'message': message['content'],
+            'username': message['sender'],
+            'timestamp': timestamp
         }))
 
     @sync_to_async
     def save_message(self, username, message):
         user = Users.objects.get(username=username)
         room = Room.objects.get(id=self.room_id)
-        Message.objects.create(room=room, sender=user, content=message)
+        msg = Message.objects.create(room=room, sender=user, content=message)
+        return msg.id
 
     @sync_to_async
-    def get_chat_history(self):
-        room = Room.objects.get(id=self.room_id)
-        messages = Message.objects.filter(room=room).order_by('timestamp')
-        return [{'username': msg.sender.username, 'message': msg.content, 'timestamp': msg.timestamp} for msg in messages]
+    def get_message_by_id(self, message_id):
+        message = Message.objects.get(id=message_id)
+        timestamp = message.timestamp.strftime('%b. %d, %Y, %I:%M %p').lstrip('0').replace("PM","p.m").replace("AM","a.m")
+        return {
+            'content': message.content,
+            'sender': message.sender.username,
+            'timestamp': timestamp
+        }
