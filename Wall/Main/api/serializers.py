@@ -37,7 +37,6 @@ class AdvertisementImageSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'image',
-            'uploaded_at',
                   ]
 from rest_framework.exceptions import PermissionDenied
 

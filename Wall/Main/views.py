@@ -197,7 +197,7 @@ def user_signup(request):
                 messages.error(request, 'There was an error with your registration.')
         else:
             form = CustomUserCreationForm()
-        return render(request, 'registration/signup.html', {'form': form})
+        return render(request, 'Main/signup.html', {'form': form})
     else:
         return redirect('home')
 
@@ -219,7 +219,7 @@ def user_login(request):
                 messages.error(request, 'Invalid username or password.')
         else:
             form = LoginForm()
-        return render(request, 'registration/login.html', {'form': form})
+        return render(request, 'Main/login.html', {'form': form})
     else:
         return redirect('home')
 
