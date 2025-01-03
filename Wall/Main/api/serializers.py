@@ -49,6 +49,7 @@ class AdvertisementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advertisement
         fields = [
+            'id',
             'title',
             'description',
             'price',
