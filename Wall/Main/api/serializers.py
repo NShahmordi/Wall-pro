@@ -1,17 +1,20 @@
 from rest_framework import serializers
-from ..models import Users, Advertisement, City, Category, Message, Room,AdvertisementImage
+from django.core.exceptions import PermissionDenied
+from ..models import Users, Advertisement, City, Category, Message, Room, AdvertisementImage
+
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = [
-                'id',
-                'first_name', 
-                'last_name', 
-                'email', 
-                'username',
-                'phone_number',
-                'slug',
-            ]
+            'id',
+            'first_name', 
+            'last_name', 
+            'email', 
+            'username',
+            'phone_number',
+            'slug',
+        ]
+
 class CitySerializers(serializers.ModelSerializer):
     class Meta:
         model = City
@@ -22,9 +25,9 @@ class CategorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = [
-                  'category_name',
-                  'parent',
-                ]
+            'category_name',
+            'parent',
+        ]
     
     def get_parent(self, obj):
         if obj.parent:
@@ -37,8 +40,7 @@ class AdvertisementImageSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'image',
-                  ]
-from rest_framework.exceptions import PermissionDenied
+        ]
 
 class AdvertisementSerializer(serializers.ModelSerializer):
     city = CitySerializers() 
@@ -49,6 +51,7 @@ class AdvertisementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advertisement
         fields = [
+            'id',
             'title',
             'description',
             'price',
@@ -77,9 +80,11 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         instance.save()
 
         if images_data:
+            print(f"Deleting images for advertisement {instance.id}")
             instance.images.all().delete()
             for image_data in images_data:
                 AdvertisementImage.objects.create(advertisement=instance, **image_data)
+                print(f"Added image {image_data} to advertisement {instance.id}")
 
         return instance
 
@@ -87,11 +92,13 @@ class MessageSerializers(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = [
-                   'id',  
-                   'room', 
-                   'sender',
-                   'message',
-                   ]
+            'id',  
+            'room', 
+            'sender',
+            'content',
+            'timestamp',
+            'updated_at',
+        ]
 
     def update(self, instance, validated_data):
         instance.message = validated_data.get('message', instance.message)
@@ -103,9 +110,12 @@ class RoomSerializers(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = [ 
-                  'token', 
-                  'users',
-                ]
+            'token', 
+            'user1',
+            'user2',
+            'created_at',
+            'messages',
+        ]
         
 class ListOfAdvertisementSerializer(serializers.ModelSerializer):
     short_description = serializers.SerializerMethodField()
@@ -126,4 +136,3 @@ class ListOfAdvertisementSerializer(serializers.ModelSerializer):
                 '...' if len(obj.description.split()) > 5\
                     else obj.description
         return None
-

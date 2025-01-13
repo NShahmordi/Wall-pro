@@ -1,45 +1,45 @@
 from rest_framework import viewsets
-
+from rest_framework.permissions import IsAuthenticated
 from .serializers import *
 from ..models import *
+from .permissions import IsSuperUserOrOwner
 
 class UserSerializersViewSet(viewsets.ModelViewSet):
-    #Define QuerySets
     queryset = Users.objects.all()
-    #Specify Serializer
     serializer_class = UserSerializers
+    permission_classes = [IsAuthenticated, IsSuperUserOrOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Users.objects.all()
+        return Users.objects.filter(id=user.id)
 
 class AdvertismentsSerializersViewSet(viewsets.ModelViewSet):
-    #Define QuerySets
     queryset = Advertisement.objects.all()
-    #Specify Serializer
     serializer_class = AdvertisementSerializer
 
-
-class CitySerializersViewSet(viewsets.ModelViewSet):
-    #Define QuerySets
-    queryset = City.objects.all()
-    #Specify Serializer
-    serializer_class = CitySerializers
-
-
-class CategorySerializersViewSet(viewsets.ModelViewSet):
-    #Define QuerySets
-    queryset = Category.objects.all()
-    #Specify Serializer
-    serializer_class = CategorySerializers
-
-
 class RoomSerializersViewSet(viewsets.ModelViewSet):
-    #Define QuerySets
     queryset = Room.objects.all()
-    #Specify Serializer
     serializer_class = RoomSerializers
+    permission_classes = [IsAuthenticated, IsSuperUserOrOwner]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Room.objects.all()
+        return Room.objects.filter(user1=user) | Room.objects.filter(user2=user)
 
 class MessageSerializersViewSet(viewsets.ModelViewSet):
-    #Define QuerySets
     queryset = Message.objects.all()
-    #Specify Serializer
     serializer_class = MessageSerializers
+    permission_classes = [IsAuthenticated, IsSuperUserOrOwner]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Message.objects.all()
+        return Message.objects.filter(sender=user)
+
+    def perform_create(self, serializer):
+        serializer.save(sender=self.request.user)
