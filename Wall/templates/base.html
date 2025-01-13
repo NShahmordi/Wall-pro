@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 {% load static %}
 <head>
     <meta charset="UTF-8">
@@ -13,22 +12,16 @@
     <link href="{% static 'css/mdb.min.css' %}" rel="stylesheet" />
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap JavaScript Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
-            background-color: #fff;
-            color: #000;
+            background-color: #f8f9fa;
+            color: #212529;
         }
         .navbar-custom {
-            background-color: #000;
+            background-color: #343a40;
         }
-        .navbar-custom .navbar-brand,
-        .navbar-custom .nav-link {
-            color: #fff;
-        }
-        .navbar-custom .nav-link:hover {
-            color: #ccc;
+        .navbar-custom .navbar-brand {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -37,14 +30,8 @@
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
     <div class="container">
         <a class="navbar-brand" href="{% url 'home' %}">Marketplace</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <i class="fas fa-bars"></i>
-        </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
-                </li>
                 {% if request.user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'create_advertisement' %}">Create Ad</a>
@@ -52,13 +39,8 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'chat_history' %}">Chat History</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Hi, {{ user.username }}
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
@@ -75,8 +57,51 @@
 
 <!-- Main content -->
 <div class="container mt-4">
+    <!-- Form for searching by title -->
+    <form method="get" action="{% url 'advertisement_suggestions' %}">
+        <div class="mb-3">
+            <label for="search" class="form-label">Search by title:</label>
+            <input type="text" class="form-control" id="search" name="search" placeholder="e.g., iPhone, Sofa">
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <!-- Form for user preferences -->
+     <form>
+         <ul>
+             {% for ad in recommendations %}
+                 <li>{{ ad.title }} - {{ ad.description }}</li>
+             {% endfor %}
+         </ul>
+     </form>
+
+
     {% block content %}
+    <div class="container mt-5">
+    <div class="row">
+        {% for product in Advertisments %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                {% with product.get_images|first as first_image %}
+                    {% if first_image %}
+                        <img src="{{ product.first_image.image.url }}" class="card-img-top" alt="{{ product.title }}">
+                    {% else %}
+                        <img src="{% static 'default-placeholder.png' %}" class="card-img-top" alt="No image available">
+                    {% endif %}
+                {% endwith %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.title }}</h5>
+                    <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                    <p class="card-text"><strong>${{ product.price }}</strong></p>
+                    <a href="{% url 'product_detail' product.slug %}" class="btn btn-dark">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
     {% endblock %}
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

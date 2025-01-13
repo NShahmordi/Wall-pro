@@ -229,44 +229,33 @@ def user_logout(request):
 
 # Advertisement Suggestions
 def suggest_ads_template(request, context_key='recommendations', as_dict=False):
-    user_ad_preferences = request.GET.get('query', '')
+    search_query = request.GET.get('search', '')
+    category_name = request.GET.get('category', '')
 
-    if not user_ad_preferences:
+    if search_query:
+        ads = Advertisement.objects.filter(title__icontains=search_query)
+        context = {context_key: ads}
+        return render(request, 'ads_list.html', context)  # Changed template to 'ads_list.html'
+
+    if not category_name:
         if as_dict:
             return []
         return render(request, 'no_preferences.html')
 
-    ads = Advertisement.objects.all()
-    
+    try:
+        category = Category.objects.get(name__iexact=category_name)
+    except Category.DoesNotExist:
+        if as_dict:
+            return []
+        return render(request, 'no_preferences.html')
+
+    ads = Advertisement.objects.filter(category=category)
+    print(f"Total ads found in category '{category_name}': {ads.count()}")
+
     ad_data = [f"{ad.title} {ad.description}" for ad in ads]
-    ad_data.append(user_ad_preferences)
-
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(ad_data)
-
-    similarity_scores = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1])
-
-    ranked_ads = sorted(zip(ads, similarity_scores[0]),
-    key=lambda x: x[1],
-    reverse=True
-    )
-
-    top_ads = [{
-        'id': ad.id,
-        'title': ad.title,
-        'description': ad.description,
-        'price': ad.price,
-        'city': ad.city.city_name if ad.city else None,
-        'category': ad.category.category_name if ad.category else None
-    } for ad, score in ranked_ads[:5]]
-
-    if as_dict:
-        return top_ads
-
-    context = {context_key: top_ads}
-
-    return render(request, 'Market\home_or_product.html', context)
-
+    ad_data.append(category_name)
+    context = {context_key: ad_data}
+    return render(request, 'ads_list.html', context)  # Changed template to 'ads_list.html'
 
 #Error Handling
 def custom_403(request, exception=None):

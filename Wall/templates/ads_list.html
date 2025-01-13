@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advertisement List</title>
+</head>
+<body>
+    <h1>Advertisements</h1>
+    <ul>
+        {% for ad in recommendations %}
+            <li>{{ ad.title }} - {{ ad.description }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

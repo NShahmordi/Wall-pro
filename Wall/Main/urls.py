@@ -1,5 +1,7 @@
 from .views import *
 from django.urls import path, include
+from .views import suggest_ads_template
+
 urlpatterns = [
     path('', HomePage, name='home'),
     path('product/<slug:slug>/', product_detail, name='product_detail'),
@@ -14,4 +16,5 @@ urlpatterns = [
     path('room/<str:token>/', room_detail, name='room_detail'),
     path('delete_image/<int:image_id>/', delete_image, name='delete_image'),
     path('api/', include('Main.api.urls')),
+    path('suggestions/', suggest_ads_template, name='advertisement_suggestions'),
 ]
