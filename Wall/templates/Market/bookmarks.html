@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Your Bookmarks</h2>
+    <div class="row">
+        {% for bookmark in bookmarks %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                {% if bookmark.advertisement.image %}
+                <img src="{{ bookmark.advertisement.image.url }}" class="card-img-top" alt="{{ bookmark.advertisement.title }}">
+                {% else %}
+                <img src="{% static 'images/default.jpg' %}" class="card-img-top" alt="Default Image">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ bookmark.advertisement.title }}</h5>
+                    <p class="card-text">{{ bookmark.advertisement.description|truncatewords:20 }}</p>
+                    <a href="{% url 'product_detail' slug=bookmark.advertisement.slug %}" class="btn btn-dark mt-auto">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

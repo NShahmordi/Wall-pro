@@ -1,6 +1,6 @@
 from .views import *
 from django.urls import path, include
-from .views import suggest_ads_template
+from .views import suggest_ads_template, add_bookmark, view_bookmarks
 
 urlpatterns = [
     path('', HomePage, name='home'),
@@ -17,4 +17,6 @@ urlpatterns = [
     path('delete_image/<int:image_id>/', delete_image, name='delete_image'),
     path('api/', include('Main.api.urls')),
     path('suggestions/', suggest_ads_template, name='advertisement_suggestions'),
+    path('add_bookmark/<int:ad_id>/', add_bookmark, name='add_bookmark'),
+    path('bookmarks/', view_bookmarks, name='view_bookmarks'),
 ]

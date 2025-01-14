@@ -30,6 +30,11 @@
             <p><strong>Price:</strong> ${{ advertisement.price }}</p>
             <p>{{ advertisement.description }}</p>
 
+            <!-- Bookmark Icon -->
+            <a href="{% url 'add_bookmark' ad_id=advertisement.id %}" class="bookmark-icon">
+                <i class="fas fa-bookmark"></i>
+            </a>
+
             {% if user.is_authenticated %}
                 {% if user.username != advertisement.owner.username %}
                     <a href="{% url 'create_room' ad_slug=slug  %}" class="btn btn-dark">Chat with Owner</a>

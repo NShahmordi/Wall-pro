@@ -144,3 +144,12 @@ def generate_unique_token():
 def delete_advertisement_images(sender, instance, **kwargs):
     for image in instance.images.all():
         image.delete()
+
+# Bookmark Model
+class Bookmark(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'advertisement')

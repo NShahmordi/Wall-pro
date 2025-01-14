@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
-from .models import Advertisement, Message, Room, AdvertisementImage, Category
+from .models import Advertisement, Message, Room, AdvertisementImage, Category, Bookmark
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -77,9 +77,17 @@ def HomePage(request):
     for product in products:
         product.first_image = AdvertisementImage.objects.filter(advertisement=product).first()
 
+    if request.user.is_authenticated:
+        bookmarks = Bookmark.objects.filter(user=request.user)
+        bookmarked_ads = [bookmark.advertisement for bookmark in bookmarks]
+        suggested_ads = Advertisement.objects.filter(category__in=[ad.category for ad in bookmarked_ads]).exclude(id__in=[ad.id for ad in bookmarked_ads])
+    else:
+        suggested_ads = Advertisement.objects.none()
+
     context = {
         'home_recommendations': recommendations,
         'Advertisments': products,
+        'suggested_ads': suggested_ads,
     }
 
     return render(request, 'Market/product_list.html', context)
@@ -262,3 +270,15 @@ def custom_404(request, exception=None):
 
 def custom_500(request):
     return render(request, 'Error_codes/500.html', status=500)
+
+# Bookmark Management
+@login_required
+def add_bookmark(request, ad_id):
+    advertisement = get_object_or_404(Advertisement, id=ad_id)
+    Bookmark.objects.get_or_create(user=request.user, advertisement=advertisement)
+    return redirect('product_detail', slug=advertisement.slug)
+
+@login_required
+def view_bookmarks(request):
+    bookmarks = Bookmark.objects.filter(user=request.user)
+    return render(request, 'Market/bookmarks.html', {'bookmarks': bookmarks})
