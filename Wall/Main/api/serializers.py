@@ -43,50 +43,16 @@ class AdvertisementImageSerializer(serializers.ModelSerializer):
         ]
 
 class AdvertisementSerializer(serializers.ModelSerializer):
-    city = CitySerializers() 
-    category = CategorySerializers() 
-    owner = UserSerializers(read_only=True)
-    images = AdvertisementImageSerializer(many=True, required=False)
-
     class Meta:
         model = Advertisement
         fields = [
-            'id',
             'title',
             'description',
             'price',
-            'slug',
+            'image',
+            'created_at',
             'owner',
-            'city',
-            'category',
-            'shirt_size',
-            'images',
         ]
-
-    def update(self, instance, validated_data):
-        user = self.context['request'].user 
-        if instance.owner != user:  
-            raise PermissionDenied("You are not the owner of this advertisement.")
-
-        images_data = validated_data.pop('images', None)
-        instance.title = validated_data.get('title', instance.title)
-        instance.description = validated_data.get('description', instance.description)
-        instance.price = validated_data.get('price', instance.price)
-        instance.slug = validated_data.get('slug', instance.slug)
-        instance.city = validated_data.get('city', instance.city)  
-        instance.category = validated_data.get('category', instance.category) 
-
-        instance.shirt_size = validated_data.get('shirt_size', instance.shirt_size)
-        instance.save()
-
-        if images_data:
-            print(f"Deleting images for advertisement {instance.id}")
-            instance.images.all().delete()
-            for image_data in images_data:
-                AdvertisementImage.objects.create(advertisement=instance, **image_data)
-                print(f"Added image {image_data} to advertisement {instance.id}")
-
-        return instance
 
 class MessageSerializers(serializers.ModelSerializer):
     class Meta:
@@ -106,17 +72,16 @@ class MessageSerializers(serializers.ModelSerializer):
         instance.save()
             
 class RoomSerializers(serializers.ModelSerializer):
-    messages = MessageSerializers(many=True)
     class Meta:
         model = Room
-        fields = [ 
-            'token', 
+        fields = [
+            'token',
             'user1',
             'user2',
             'created_at',
             'messages',
         ]
-        
+
 class ListOfAdvertisementSerializer(serializers.ModelSerializer):
     short_description = serializers.SerializerMethodField()
     class Meta:
@@ -125,10 +90,6 @@ class ListOfAdvertisementSerializer(serializers.ModelSerializer):
             'title',
             'short_description',
             'image',
-            'price',
-            'created_at',
-            'city',
-            'category',
         ]        
     def get_short_description(self, obj):
         if obj.description:
