@@ -16,10 +16,10 @@ import os
 
 
 
-# Our models
+# Custom User Model
 class Users(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
-    username = models.CharField(_("username"),unique=True,max_length=50)
+    username = models.CharField(_("username"), unique=True, max_length=50)
     email = models.EmailField(_("email address"), unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -33,28 +33,31 @@ class Users(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
-    
+
     def __str__(self):
         return self.username
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.username)
         super().save(*args, **kwargs)
 
+# Category Model
 class Category(models.Model):
     category_name = models.CharField(max_length=20, null=True, blank=True)
-    parent = models.ForeignKey('self',
-                                on_delete=models.CASCADE, null=True, blank=True,
-                                related_name='children')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+
     def __str__(self):
         return self.category_name
 
+# City Model
 class City(models.Model):
     city_name = models.CharField(max_length=20, null=True, blank=True)
+
     def __str__(self):
         return self.city_name
 
+# Advertisement Model
 class Advertisement(models.Model):
     title = models.CharField(max_length=40, null=True)
     description = models.TextField()
@@ -71,7 +74,14 @@ class Advertisement(models.Model):
         ('as_new', 'as new'),
         ('U', 'Used'),
     )
-    shirt_size = models.CharField(max_length=6, choices=SHIRT_SIZES,default='N')
+    shirt_size = models.CharField(max_length=6, choices=SHIRT_SIZES, default='N')
+    STATUS_CHOICES = (
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('sold', 'Sold'),
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+
     def __str__(self):
         return self.title
 
@@ -81,38 +91,22 @@ class Advertisement(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        super(Advertisement, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
+# Advertisement Image Model
 class AdvertisementImage(models.Model):
-    advertisement = models.ForeignKey( Advertisement,
-                                      related_name='images',
-                                      on_delete=models.CASCADE
-                                      )
+    advertisement = models.ForeignKey(Advertisement, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='ads_images/')
+
     def delete(self, *args, **kwargs):
-        # Remove the file from the filesystem
-        if self.image:
-            if os.path.isfile(self.image.path):
-                os.remove(self.image.path)
+        if self.image and os.path.isfile(self.image.path):
+            os.remove(self.image.path)
         super().delete(*args, **kwargs)
 
-def generate_unique_token():
-    while True:
-        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-        if not Room.objects.filter(token=token).exists():
-            return token
-        
+# Room Model
 class Room(models.Model):
-    user1 = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='user1_rooms',
-        on_delete=models.CASCADE
-    )
-    user2 = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='user2_rooms',
-        on_delete=models.CASCADE
-    )
+    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user1_rooms', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user2_rooms', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     token = models.CharField(max_length=10, unique=True, blank=True, null=True)
 
@@ -125,14 +119,12 @@ class Room(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = generate_unique_token()
-        super(Room, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
+# Message Model
 class Message(models.Model):
     room = models.ForeignKey(Room, related_name='messages', on_delete=models.CASCADE)
-    sender = models.ForeignKey( settings.AUTH_USER_MODEL,
-                               related_name='messages',
-                               on_delete=models.CASCADE
-                               )
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -140,7 +132,15 @@ class Message(models.Model):
     def __str__(self):
         return f"Message from {self.sender} in {self.room}"
 
+# Utility Functions
+def generate_unique_token():
+    while True:
+        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        if not Room.objects.filter(token=token).exists():
+            return token
+
+# Signal Handlers
 @receiver(post_delete, sender=Advertisement)
 def delete_advertisement_images(sender, instance, **kwargs):
     for image in instance.images.all():
-        image.delete()  # This calls the custom delete method of AdvertisementImage
+        image.delete()

@@ -1,19 +1,15 @@
-from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
-from .models import Advertisement, Users, Message, Room, AdvertisementImage, Category
-from django.contrib.auth import authenticate, login, logout
+from .models import Advertisement, Message, Room, AdvertisementImage, Category
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-import secrets 
 import string 
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import JsonResponse
+# Utility Functions
+def generate_token(length=32):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-def generate_token(length=32): 
-    characters = string.ascii_letters + string.digits + string.punctuation 
-    token = ''.join(secrets.choice(characters) for _ in range(length))
-    return token
 # Chat Management
 @login_required
 def chat_history(request):
@@ -22,20 +18,9 @@ def chat_history(request):
 
 @login_required
 def create_or_get_room(request, ad_slug):
-    advertisment = Advertisement.objects.get(slug=ad_slug)
-    user1 = request.user
-    user2 = advertisment.owner
-    
-    # Check if a room already exists between the two users
-    room = Room.objects.filter(user1=user1, user2=user2).first() or Room.objects.filter(user1=user2, user2=user1).first()
-    
-    if room:
-        return redirect('room_detail', token=room.token)
-    
-    if user2 != user1:
-        token = generate_token()
-        room, created = Room.objects.get_or_create(user1=user1, user2=user2, token=token)
-        return redirect('room_detail', token=token)
+    ad = get_object_or_404(Advertisement, slug=ad_slug)
+    room, created = Room.objects.get_or_create(user1=request.user, user2=ad.owner)
+    return redirect('room_detail', token=room.token)
 
 @login_required
 def room_detail(request, token):
@@ -60,6 +45,33 @@ def room_detail(request, token):
 # Advertisement Management
 def HomePage(request):
     products = Advertisement.objects.all()
+
+    # Filtering by city
+    city = request.GET.get('city')
+    if city:
+        products = products.filter(city__city_name__icontains=city)
+
+    # Filtering by category
+    category = request.GET.get('category')
+    if category:
+        products = products.filter(category__category_name__icontains=category)
+
+    # Filtering by price range
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    if min_price and max_price:
+        products = products.filter(price__gte=min_price, price__lte=max_price)
+
+    # Filtering by status
+    status = request.GET.get('status')
+    if status:
+        products = products.filter(status=status)
+
+    # Searching by title
+    search_query = request.GET.get('search')
+    if search_query:
+        products = products.filter(title__icontains=search_query)
+
     recommendations = suggest_ads_template(request, context_key='home_recommendations', as_dict=True)
 
     for product in products:
@@ -186,46 +198,30 @@ def delete_image(request, image_id):
 
 # User Authentication
 def user_signup(request):
-    if not request.user.is_authenticated:
-        if request.method == "POST":
-            form = CustomUserCreationForm(request.POST)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'User registered successfully.')
-                return redirect('login')
-            else:
-                messages.error(request, 'There was an error with your registration.')
-        else:
-            form = CustomUserCreationForm()
-        return render(request, 'Main/signup.html', {'form': form})
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created successfully.')
+            return redirect('login')
     else:
-        return redirect('home')
+        form = SignUpForm()
+    return render(request, 'registration/signup.html', {'form': form})
 
 def user_login(request):
-    if not request.user.is_authenticated:
-        if request.method == "POST":
-            form = LoginForm(request=request, data=request.POST)
-            if form.is_valid():
-                uname = form.cleaned_data["username"]
-                upass = form.cleaned_data["password"]
-                user = authenticate(username=uname, password=upass)
-                if user is not None:
-                    login(request, user)
-                    messages.success(request, 'Logged in successfully.')
-                    return redirect('home')
-                else:
-                    messages.error(request, 'Invalid username or password.')
-            else:
-                messages.error(request, 'Invalid username or password.')
-        else:
-            form = LoginForm()
-        return render(request, 'Main/login.html', {'form': form})
+    if request.method == 'POST':
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')
     else:
-        return redirect('home')
+        form = LoginForm()
+    return render(request, 'registration/login.html', {'form': form})
 
 def user_logout(request):
     logout(request)
-    return HttpResponseRedirect("/login/")
+    return redirect('home')
 
 # Advertisement Suggestions
 def suggest_ads_template(request, context_key='recommendations', as_dict=False):

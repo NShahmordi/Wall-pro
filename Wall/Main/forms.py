@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm,AuthenticationForm,UsernameField
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, UsernameField
 from django import forms
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
