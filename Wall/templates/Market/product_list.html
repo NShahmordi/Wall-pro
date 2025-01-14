@@ -51,26 +51,26 @@
         <!-- Main Content for Advertisements -->
         <div class="col-md-9">
             <div class="row">
-                {% for product in Advertisments %}
+                {% for ad in Advertisments %}
                 <div class="col-md-4 mb-4">
                     <div class="card shadow-sm h-100">
-                        {% with product.get_images|first as first_image %}
+                        {% with ad.get_images|first as first_image %}
                             {% if first_image %}
-                                <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ product.title }}">
+                                <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ ad.title }}">
                             {% else %}
                                 <img src="{% static 'default-placeholder.png' %}" class="card-img-top" alt="No image available">
                             {% endif %}
                         {% endwith %}
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ product.title }}</h5>
-                            <p class="card-text">{{ product.description|truncatewords:20 }}</p>
-                            <p class="card-text"><strong>${{ product.price }}</strong></p>
-                            <p class="card-text"><strong>City:</strong> {{ product.city }}</p>
-                            <p class="card-text"><strong>Category:</strong> {{ product.category }}</p>
-                            <p class="card-text"><strong>Status:</strong> {{ product.get_status_display }}</p>
-                            <a href="{% url 'product_detail' product.slug %}" class="btn btn-dark mt-auto">View Details</a>
-                            {% if request.user == product.owner %}
-                            <a href="{% url 'edit_ad' product.slug %}" class="btn btn-outline-dark mt-2">Edit</a>
+                            <h5 class="card-title">{{ ad.title }}</h5>
+                            <p class="card-text">{{ ad.description|truncatewords:20 }}</p>
+                            <p class="card-text"><strong>${{ ad.price }}</strong></p>
+                            <p class="card-text"><strong>City:</strong> {{ ad.city }}</p>
+                            <p class="card-text"><strong>Category:</strong> {{ ad.category }}</p>
+                            <p class="card-text"><strong>Status:</strong> {{ ad.get_status_display }}</p>
+                            <a href="{% url 'product_detail' ad.slug %}" class="btn btn-dark mt-auto">View Details</a>
+                            {% if request.user == ad.owner %}
+                            <a href="{% url 'edit_ad' ad.slug %}" class="btn btn-outline-dark mt-2">Edit</a>
                             {% endif %}
                         </div>
                     </div>
@@ -86,7 +86,13 @@
                     {% for ad in suggested_ads %}
                     <div class="col-md-4 mb-4">
                         <div class="card shadow-sm h-100">
-                            <img src="{{ ad.image.url }}" class="card-img-top" alt="{{ ad.title }}">
+                            {% with ad.get_images|first as first_image %}
+                                {% if first_image %}
+                                    <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ ad.title }}">
+                                {% else %}
+                                    <img src="{% static 'default-placeholder.png' %}" class="card-img-top" alt="No image available">
+                                {% endif %}
+                            {% endwith %}
                             <div class="card-body">
                                 <h5 class="card-title">{{ ad.title }}</h5>
                                 <p class="card-text">{{ ad.description|truncatewords:20 }}</p>

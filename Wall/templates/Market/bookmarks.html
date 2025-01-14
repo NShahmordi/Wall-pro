@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-4">Your Bookmarks</h2>
@@ -6,14 +7,19 @@
         {% for bookmark in bookmarks %}
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm h-100">
-                {% if bookmark.advertisement.image %}
-                <img src="{{ bookmark.advertisement.image.url }}" class="card-img-top" alt="{{ bookmark.advertisement.title }}">
-                {% else %}
-                <img src="{% static 'images/default.jpg' %}" class="card-img-top" alt="Default Image">
-                {% endif %}
-                <div class="card-body">
+                {% with bookmark.advertisement.get_images|first as first_image %}
+                    {% if first_image %}
+                        <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ bookmark.advertisement.title }}">
+                    {% else %}
+                        <img src="{% static 'default-placeholder.png' %}" class="card-img-top" alt="No image available">
+                    {% endif %}
+                {% endwith %}
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ bookmark.advertisement.title }}</h5>
                     <p class="card-text">{{ bookmark.advertisement.description|truncatewords:20 }}</p>
+                    <p class="card-text"><strong>Price:</strong> ${{ bookmark.advertisement.price }}</p>
+                    <p class="card-text"><strong>City:</strong> {{ bookmark.advertisement.city }}</p>
+                    <p class="card-text"><strong>Category:</strong> {{ bookmark.advertisement.category }}</p>
                     <a href="{% url 'product_detail' slug=bookmark.advertisement.slug %}" class="btn btn-dark mt-auto">View Details</a>
                 </div>
             </div>

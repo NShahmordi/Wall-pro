@@ -72,8 +72,6 @@ def HomePage(request):
     if search_query:
         products = products.filter(title__icontains=search_query)
 
-    recommendations = suggest_ads_template(request, context_key='home_recommendations', as_dict=True)
-
     for product in products:
         product.first_image = AdvertisementImage.objects.filter(advertisement=product).first()
 
@@ -85,7 +83,6 @@ def HomePage(request):
         suggested_ads = Advertisement.objects.none()
 
     context = {
-        'home_recommendations': recommendations,
         'Advertisments': products,
         'suggested_ads': suggested_ads,
     }
@@ -93,20 +90,14 @@ def HomePage(request):
     return render(request, 'Market/product_list.html', context)
 
 
+@login_required
 def product_detail(request, slug):
     advertisement = get_object_or_404(Advertisement, slug=slug)
-    ad_slug = advertisement.slug
-    image = AdvertisementImage.objects.filter(advertisement = advertisement)
-
-    recommendations = suggest_ads_template(request, context_key='product_recommendations', as_dict=True)
-
-    context = {
+    is_bookmarked = Bookmark.objects.filter(user=request.user, advertisement=advertisement).exists()
+    return render(request, 'Market/product_detail.html', {
         'advertisement': advertisement,
-        'product_recommendations': recommendations,
-        'image' : image,
-        'slug' : ad_slug
-    }
-    return render(request, 'Market/product_detail.html', context)
+        'is_bookmarked': is_bookmarked,
+    })
 
 @login_required
 def create_advertisement(request):
@@ -230,37 +221,6 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('home')
-
-# Advertisement Suggestions
-def suggest_ads_template(request, context_key='recommendations', as_dict=False):
-    search_query = request.GET.get('search', '')
-    category_name = request.GET.get('category', '')
-
-    if search_query:
-        ads = Advertisement.objects.filter(title__icontains=search_query)
-        context = {context_key: ads}
-        return render(request, 'ads_list.html', context)  # Changed template to 'ads_list.html'
-
-    if not category_name:
-        if as_dict:
-            return []
-        return render(request, 'no_preferences.html')
-
-    try:
-        category = Category.objects.get(name__iexact=category_name)
-    except Category.DoesNotExist:
-        if as_dict:
-            return []
-        return render(request, 'no_preferences.html')
-
-    ads = Advertisement.objects.filter(category=category)
-    print(f"Total ads found in category '{category_name}': {ads.count()}")
-
-    ad_data = [f"{ad.title} {ad.description}" for ad in ads]
-    ad_data.append(category_name)
-    context = {context_key: ad_data}
-    return render(request, 'ads_list.html', context)  # Changed template to 'ads_list.html'
-
 #Error Handling
 def custom_403(request, exception=None):
     return render(request, 'Error_codes/403.html', status=403)
@@ -282,3 +242,11 @@ def add_bookmark(request, ad_id):
 def view_bookmarks(request):
     bookmarks = Bookmark.objects.filter(user=request.user)
     return render(request, 'Market/bookmarks.html', {'bookmarks': bookmarks})
+
+@login_required
+def toggle_bookmark(request, ad_id):
+    advertisement = get_object_or_404(Advertisement, id=ad_id)
+    bookmark, created = Bookmark.objects.get_or_create(user=request.user, advertisement=advertisement)
+    if not created:
+        bookmark.delete()
+    return redirect('product_detail', slug=advertisement.slug)

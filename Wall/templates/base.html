@@ -103,9 +103,10 @@
                     }
                 }).then(response => {
                     if (response.ok) {
-                        alert('Bookmarked successfully!');
+                        this.querySelector('i').classList.toggle('text-dark');
+                        this.querySelector('i').classList.toggle('text-muted');
                     } else {
-                        alert('Failed to bookmark.');
+                        alert('Failed to toggle bookmark.');
                     }
                 }).catch(error => {
                     console.error('Error:', error);

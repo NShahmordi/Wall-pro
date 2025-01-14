@@ -31,8 +31,8 @@
             <p>{{ advertisement.description }}</p>
 
             <!-- Bookmark Icon -->
-            <a href="{% url 'add_bookmark' ad_id=advertisement.id %}" class="bookmark-icon">
-                <i class="fas fa-bookmark"></i>
+            <a href="{% url 'toggle_bookmark' ad_id=advertisement.id %}" class="bookmark-icon">
+                <i class="fas fa-bookmark {% if is_bookmarked %}text-dark{% else %}text-muted{% endif %}"></i>
             </a>
 
             {% if user.is_authenticated %}
