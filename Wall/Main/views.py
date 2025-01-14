@@ -259,10 +259,10 @@ def suggest_ads_template(request, context_key='recommendations', as_dict=False):
 
 #Error Handling
 def custom_403(request, exception=None):
-    return render(request, 'errors/403.html', status=403)
+    return render(request, 'Error_codes/403.html', status=403)
 
 def custom_404(request, exception=None):
-    return render(request, 'errors/404.html', status=404)
+    return render(request, 'Error_codes/404.html', status=404)
 
 def custom_500(request):
-    return render(request, 'errors/500.html', status=500)
+    return render(request, 'Error_codes/500.html', status=500)
