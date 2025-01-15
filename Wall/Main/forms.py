@@ -41,7 +41,7 @@ class SignUpForm(CustomUserCreationForm):
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
     )
     class Meta:
-        model = User
+        model = Users
         fields = ("username", "first_name", "last_name", "email",)
         labels = {
             "first_name": "First Name",
