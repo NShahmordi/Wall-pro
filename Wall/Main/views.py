@@ -92,12 +92,19 @@ def HomePage(request):
 
 @login_required
 def product_detail(request, slug):
-    advertisement = get_object_or_404(Advertisement, slug=slug)
-    is_bookmarked = Bookmark.objects.filter(user=request.user, advertisement=advertisement).exists()
-    return render(request, 'Market/product_detail.html', {
-        'advertisement': advertisement,
+    product = get_object_or_404(Advertisement, slug=slug)
+    is_bookmarked = False
+    if request.user.is_authenticated:
+        is_bookmarked = product.bookmarks.filter(id=request.user.id).exists()
+    ad_slug = product.slug
+    image = AdvertisementImage.objects.filter(advertisement = product)
+    context = {
+        'advertisement': product,
         'is_bookmarked': is_bookmarked,
-    })
+        'image' : image,
+        'slug' : ad_slug
+    }
+    return render(request, 'Market/product_detail.html', context)
 
 @login_required
 def create_advertisement(request):

@@ -148,7 +148,7 @@ def delete_advertisement_images(sender, instance, **kwargs):
 # Bookmark Model
 class Bookmark(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE)
+    advertisement = models.ForeignKey(Advertisement, related_name='bookmarks', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
