@@ -31,10 +31,10 @@ class AdvertisementImageInline(admin.TabularInline):
 # Custom Advertisement Admin
 @admin.register(Advertisement)
 class CustomAdvertisementAdmin(admin.ModelAdmin):
-    list_display = ("title", "price", "city", "category", "created_at", "updated_at")
-    list_filter = ("city", "category", "created_at")
-    search_fields = ("title", "description")
-    ordering = ("-created_at",)
+    list_display = ('title', 'price', 'status', 'owner', 'created_at')
+    list_filter = ('status', 'created_at', 'updated_at')
+    search_fields = ('title', 'description', 'owner__username')
+    ordering = ('-created_at',)
     prepopulated_fields = {'slug': ('title',)}
     inlines = [AdvertisementImageInline]
 
@@ -56,6 +56,13 @@ class CustomCategoryAdmin(admin.ModelAdmin):
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('id', 'room', 'sender', 'content', 'timestamp', 'updated_at')
     list_filter = ('timestamp', 'updated_at')
+
+# Custom Bookmark Admin
+@admin.register(Bookmark)
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ('user', 'advertisement', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'advertisement__title')
 
 # Register Room Model
 admin.site.register(Room)
