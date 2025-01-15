@@ -205,7 +205,7 @@ def user_signup(request):
             return redirect('login')
     else:
         form = SignUpForm()
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'Main/signup.html', {'form': form})
 
 def user_login(request):
     if request.method == 'POST':
@@ -216,7 +216,7 @@ def user_login(request):
             return redirect('home')
     else:
         form = LoginForm()
-    return render(request, 'registration/login.html', {'form': form})
+    return render(request, 'Main/login.html', {'form': form})
 
 def user_logout(request):
     logout(request)
