@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import *
 from ..models import *
-from .permissions import IsSuperUserOrOwner
+from .permissions import IsSuperUserOrOwner, IsAdminOrOwner
 
 class UserSerializersViewSet(viewsets.ModelViewSet):
     queryset = Users.objects.all()
@@ -53,3 +53,30 @@ class MessageSerializersViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
+
+class AdvertisementViewSet(viewsets.ModelViewSet):
+    queryset = Advertisement.objects.all()
+    serializer_class = AdvertisementSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrOwner]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+class BookmarkViewSet(viewsets.ModelViewSet):
+    queryset = Bookmark.objects.all()
+    serializer_class = BookmarkSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrOwner]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Bookmark.objects.all()
+        return Bookmark.objects.filter(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        advertisement = Advertisement.objects.get(id=request.data['advertisement'])
+        bookmark, created = Bookmark.objects.get_or_create(user=request.user, advertisement=advertisement)
+        if not created:
+            bookmark.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = self.get_serializer(bookmark)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

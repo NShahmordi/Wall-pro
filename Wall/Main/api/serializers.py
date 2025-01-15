@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.core.exceptions import PermissionDenied
-from ..models import Users, Advertisement, City, Category, Message, Room, AdvertisementImage
+from ..models import Users, Advertisement, City, Category, Message, Room, AdvertisementImage, Bookmark
 
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
@@ -43,15 +43,35 @@ class AdvertisementImageSerializer(serializers.ModelSerializer):
         ]
 
 class AdvertisementSerializer(serializers.ModelSerializer):
+    images = AdvertisementImageSerializer(many=True, read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Advertisement
         fields = [
+            'id',
             'title',
             'description',
             'price',
-            'image',
             'created_at',
+            'updated_at',
+            'slug',
             'owner',
+            'city',
+            'category',
+            'status',
+            'images',
+        ]
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    advertisement = AdvertisementSerializer()
+
+    class Meta:
+        model = Bookmark
+        fields = [
+            'id',
+            'advertisement',
+            'created_at',
         ]
 
 class MessageSerializers(serializers.ModelSerializer):
