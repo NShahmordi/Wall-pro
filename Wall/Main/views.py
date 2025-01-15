@@ -90,7 +90,6 @@ def HomePage(request):
     return render(request, 'Market/product_list.html', context)
 
 
-@login_required
 def product_detail(request, slug):
     product = get_object_or_404(Advertisement, slug=slug)
     is_bookmarked = False

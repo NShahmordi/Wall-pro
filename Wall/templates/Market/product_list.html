@@ -68,7 +68,7 @@
                             <p class="card-text"><strong>City:</strong> {{ ad.city }}</p>
                             <p class="card-text"><strong>Category:</strong> {{ ad.category }}</p>
                             <p class="card-text"><strong>Status:</strong> {{ ad.get_status_display }}</p>
-                            <a href="{% url 'product_detail' ad.slug %}" class="btn btn-dark mt-auto">View Details</a>
+                            <a href="{% url 'product_detail' slug=ad.slug %}" class="btn btn-dark mt-auto">View Details</a>
                             {% if request.user == ad.owner %}
                             <a href="{% url 'edit_ad' ad.slug %}" class="btn btn-outline-dark mt-2">Edit</a>
                             {% endif %}
