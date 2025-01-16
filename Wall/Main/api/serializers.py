@@ -121,4 +121,4 @@ class ListOfAdvertisementSerializer(serializers.ModelSerializer):
 
     def get_first_image(self, obj):
         first_image = obj.images.first()
-        return AdvertisementImageSerializer(first_image).data if first_image else None
+        return first_image.image.url if first_image else None

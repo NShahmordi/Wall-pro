@@ -14,6 +14,7 @@ import random
 import string
 import os
 import secrets
+from unidecode import unidecode
 
 
 
@@ -40,7 +41,8 @@ class Users(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.username)
+            # Use unidecode to handle Persian input
+            self.slug = slugify(unidecode(self.username))
         super().save(*args, **kwargs)
 
 # Category Model
@@ -60,13 +62,13 @@ class City(models.Model):
 
 # Advertisement Model
 class Advertisement(models.Model):
-    title = models.CharField(max_length=40, null=True)
+    title = models.CharField(max_length=200)
     description = models.TextField()
     price = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(unique=True, blank=True, null=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
@@ -91,7 +93,8 @@ class Advertisement(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            # Use unidecode to handle Persian input
+            self.slug = slugify(unidecode(self.title))
         super().save(*args, **kwargs)
 
 # Advertisement Image Model
