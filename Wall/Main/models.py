@@ -13,6 +13,7 @@ from django.dispatch import receiver
 import random
 import string
 import os
+import secrets
 
 
 
@@ -105,10 +106,10 @@ class AdvertisementImage(models.Model):
 
 # Room Model
 class Room(models.Model):
-    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user1_rooms', on_delete=models.CASCADE)
-    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user2_rooms', on_delete=models.CASCADE)
+    token = models.CharField(max_length=50, unique=True, blank=True, null=False)
+    user1 = models.ForeignKey(Users, related_name='user1_rooms', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(Users, related_name='user2_rooms', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    token = models.CharField(max_length=10, unique=True, blank=True, null=True)
 
     class Meta:
         unique_together = ('user1', 'user2')
@@ -118,7 +119,7 @@ class Room(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.token:
-            self.token = generate_unique_token()
+            self.token = secrets.token_urlsafe(16)
         super().save(*args, **kwargs)
 
 # Message Model
