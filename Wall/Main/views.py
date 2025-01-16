@@ -95,13 +95,11 @@ def product_detail(request, slug):
     is_bookmarked = False
     if request.user.is_authenticated:
         is_bookmarked = product.bookmarks.filter(id=request.user.id).exists()
-    ad_slug = product.slug
-    image = AdvertisementImage.objects.filter(advertisement = product)
+    images = AdvertisementImage.objects.filter(advertisement=product)
     context = {
         'advertisement': product,
         'is_bookmarked': is_bookmarked,
-        'image' : image,
-        'slug' : ad_slug
+        'images': images,
     }
     return render(request, 'Market/product_detail.html', context)
 
