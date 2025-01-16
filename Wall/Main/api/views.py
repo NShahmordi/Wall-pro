@@ -57,10 +57,10 @@ class MessageSerializersViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
 
-class AdvertisementViewSet(viewsets.ModelViewSet):
+class ListOfAdvertisementViewSet(viewsets.ModelViewSet):
     queryset = Advertisement.objects.all()
-    serializer_class = AdvertisementSerializer
-    permission_classes = [IsAuthenticated, IsAdminOrOwner]
+    serializer_class = ListOfAdvertisementSerializer
+    permission_classes = []
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
