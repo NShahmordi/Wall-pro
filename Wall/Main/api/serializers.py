@@ -104,16 +104,21 @@ class RoomSerializers(serializers.ModelSerializer):
 
 class ListOfAdvertisementSerializer(serializers.ModelSerializer):
     short_description = serializers.SerializerMethodField()
+    first_image = serializers.SerializerMethodField()
+
     class Meta:
         model = Advertisement
         fields = [
             'title',
             'short_description',
-            'image',
-        ]        
+            'first_image',
+        ]
+
     def get_short_description(self, obj):
         if obj.description:
-            return ' '.join(obj.description.split()[:5]) +\
-                '...' if len(obj.description.split()) > 5\
-                    else obj.description
+            return ' '.join(obj.description.split()[:5]) + '...' if len(obj.description.split()) > 5 else obj.description
         return None
+
+    def get_first_image(self, obj):
+        first_image = obj.images.first()
+        return AdvertisementImageSerializer(first_image).data if first_image else None
